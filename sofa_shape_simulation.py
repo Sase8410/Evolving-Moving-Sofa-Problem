@@ -1,9 +1,3 @@
-"""Step 3: adjustable polygon sofas using the Step 2 simulation.
-
-Keep sofa_path_simulation.py in the same folder.
-Coordinates describe an ordered boundary around a fixed local origin (0, 0).
-"""
-
 import argparse
 import numpy as np
 from shapely.affinity import rotate, translate
@@ -16,7 +10,6 @@ from sofa_path_simulation import (
 
 
 def make_sofa(vertices):
-    """Create one filled polygon; reject invalid or crossing boundaries."""
     vertices = np.asarray(vertices, dtype=float)
     if (vertices.ndim != 2 or vertices.shape[1] != 2
             or len(vertices) < 3 or not np.isfinite(vertices).all()):
@@ -32,7 +25,6 @@ def make_sofa(vertices):
 
 def create_candidate(shape, width=1.5, height=0.6,
                      notch_depth=0.25, curve_points=60):
-    """Generate editable shapes inside the same width-by-height envelope."""
     if not all(np.isfinite(v) and v > 0 for v in (width, height)):
         raise ValueError("Width and height must be finite and positive.")
 
@@ -71,13 +63,11 @@ def create_candidate(shape, width=1.5, height=0.6,
 
 
 def transform_sofa(sofa, x, y, angle_degrees):
-    """Rotate about the local origin, then move that origin to (x, y)."""
     rotated = rotate(sofa, angle_degrees, origin=(0, 0))
     return translate(rotated, xoff=x, yoff=y)
 
 
 def check_path(sofa, poses):
-    """Check the whole filled polygon at every sampled pose."""
     sofas = [transform_sofa(sofa, *pose) for pose in poses]
     fits = np.array([HALLWAY.covers(s) for s in sofas], dtype=bool)
     outside_areas = np.array([s.difference(HALLWAY).area for s in sofas])
