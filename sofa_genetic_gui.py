@@ -1,14 +1,3 @@
-"""Step 5: run genetic sofa optimization entirely from a window.
-
-Keep sofa_fitness.py, sofa_shape_simulation.py, and sofa_path_simulation.py
-in this folder. Open this file in VS Code and click Run Python File.
-The earlier sofa_genetic_algorithm.py is not required by this version.
-
-Save result writes best_sofa_gui.json beside this script, replacing that file.
-The route, shape family, and bounded dimensions limit this search. Sampling
-does not prove continuous clearance or global optimality.
-"""
-
 import json
 from pathlib import Path
 from queue import Empty, Queue
@@ -24,8 +13,6 @@ from sofa_fitness import evaluate_sofa
 from sofa_path_simulation import TURNING_ROUTE, sample_path, animate_path
 from sofa_shape_simulation import create_candidate, check_path
 
-
-# Width, height, and notch depth / height. Rectangles use only two genes.
 BOUNDS = np.array([[0.20, 2.40], [0.15, 1.00], [0.02, 0.95]])
 SEARCH_DETAIL = {"Standard": (0.04, 2.0), "Fine": (0.01, 0.5)}
 OUTPUT_PATH = Path(__file__).resolve().with_name("best_sofa_gui.json")
@@ -46,7 +33,6 @@ def make_sofa(genes, settings):
 
 
 def run_search(settings, messages, stop):
-    """Background worker: only geometry and evolution, never window updates."""
     try:
         rng = np.random.default_rng(settings["seed"])
         count = settings["population"]
@@ -93,7 +79,6 @@ def run_search(settings, messages, stop):
             if stop.is_set() or generation == settings["generations"]:
                 break
 
-            # Preserve two elites, then generate children from tournaments.
             order = np.argsort(-scores, kind="stable")
             population, scores = population[order], scores[order]
 
@@ -116,7 +101,6 @@ def run_search(settings, messages, stop):
             messages.put(("done", None))
             return
 
-        # A stopped search also checks its best evaluated candidate.
         messages.put(("checking", None))
         fine_distance = min(0.005, settings["max_distance"] / 8)
         fine_angle = min(0.25, settings["max_angle"] / 8)
@@ -217,12 +201,11 @@ class SofaEvolutionWindow:
         self.fig.text(0.06, 0.025, "Sampled checks only. The route stays fixed; continuous clearance is not proven.",
                       fontsize=9, color="#64748b")
 
-        # Poll worker messages on the GUI thread; do not draw from the worker.
         self.timer = self.fig.canvas.new_timer(interval=60)
         self.timer.add_callback(self.poll)
         self.timer.start()
         self.fig.canvas.mpl_connect("close_event", self.close)
-        self.fig.sofa_window = self  # Retain widgets and timers in IDEs.
+        self.fig.sofa_window = self 
         self.update_controls()
 
     def add_slider(self, label, y, minimum, maximum, initial, step, fmt):
@@ -232,8 +215,6 @@ class SofaEvolutionWindow:
 
     def update_controls(self):
         for widget in self.controls:
-            # RadioButtons.set_active(index) selects an option; use the shared
-            # active property to enable/disable all widget types consistently.
             widget.active = not self.busy
         states = [(self.start_button, not self.busy), (self.stop_button, self.busy),
                   (self.replay_button, not self.busy and self.result is not None),
