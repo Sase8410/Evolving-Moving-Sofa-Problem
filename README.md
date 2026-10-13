@@ -1,4 +1,4 @@
-# AI Moving Sofa — Shape + Motion Lab
+# AI Moving Sofa
 
 A desktop Python application for finding a route for a rigid polygon and for
 discovering new sofa shapes together with their movements through a unit-width
