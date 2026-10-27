@@ -1,0 +1,37 @@
+{
+  "V3": {
+    "runs": 5,
+    "feasible_runs": 5,
+    "feasible_rate": 1.0,
+    "best_validated_area": 2.207629326119184,
+    "mean_validated_area": 2.205454963598851,
+    "std_validated_area": 0.002039036506836696,
+    "median_validated_area": 2.2054098757839085,
+    "mean_area_failures_as_zero": 2.205454963598851,
+    "mean_search_seconds": 7.483139846400081,
+    "mean_total_seconds": 19.140808918000403
+  },
+  "V3_NN": {
+    "runs": 5,
+    "feasible_runs": 5,
+    "feasible_rate": 1.0,
+    "best_validated_area": 2.2052782189626283,
+    "mean_validated_area": 2.1954373288172717,
+    "std_validated_area": 0.01609475306237709,
+    "median_validated_area": 2.2012073033486637,
+    "mean_area_failures_as_zero": 2.1954373288172717,
+    "mean_search_seconds": 15.268969179000488,
+    "mean_total_seconds": 29.477378302200304
+  },
+  "paired_V3_NN_minus_V3": {
+    "valid_pairs": 5,
+    "mean_delta": -0.010017634781579155,
+    "wins": 1,
+    "ties": 0,
+    "bootstrap_95_percent_interval": [
+      -0.025455252497937498,
+      -0.0004103948111085387
+    ],
+    "note": "Conditional on both runs passing; small-budget results do not establish convergence."
+  }
+}

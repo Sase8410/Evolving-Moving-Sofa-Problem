@@ -1,0 +1,135 @@
+{
+  "run_id": "daadb37e901c466eaec135b880ffc78b",
+  "validated_area": 2.2052186583426585,
+  "motion": {
+    "kind": "cubic",
+    "times": [
+      0.0,
+      0.125,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ],
+    "poses_radians": [
+      [
+        0.1144765317846011,
+        1.0,
+        0.0
+      ],
+      [
+        0.14095786467487753,
+        1.0281855592853288,
+        0.01754723872334638
+      ],
+      [
+        0.15635057305423128,
+        1.1770967675258452,
+        0.11108698378979681
+      ],
+      [
+        0.0999281025842104,
+        1.9044485050968387,
+        0.6442783020772345
+      ],
+      [
+        0.014697483866760291,
+        2.3617031001152045,
+        1.2339382129989735
+      ],
+      [
+        0.0,
+        2.4445777349867983,
+        1.5707963267948966
+      ]
+    ]
+  },
+  "finalists": [
+    {
+      "search_area": 2.236431414776007,
+      "reconstructed_area": 2.2052186273114303,
+      "construction": {
+        "intervals": 2030,
+        "target_displacement": 0.002,
+        "radius_bound": 2.4441961259720766,
+        "roundoff_margin": 1e-08
+      },
+      "verification": {
+        "status": "bounded_numerical_pass",
+        "area": 2.2052186273114303,
+        "intervals_passed": 2030,
+        "unresolved_intervals": 0,
+        "poses_checked": 4312,
+        "max_outside_area": 0.0,
+        "arithmetic": "floating point; not a formal certificate",
+        "endpoints_in_separate_arms": true
+      }
+    },
+    {
+      "search_area": 2.2364314114015644,
+      "reconstructed_area": 2.2052186583426585,
+      "construction": {
+        "intervals": 2030,
+        "target_displacement": 0.002,
+        "radius_bound": 2.4441961259720766,
+        "roundoff_margin": 1e-08
+      },
+      "verification": {
+        "status": "bounded_numerical_pass",
+        "area": 2.2052186583426585,
+        "intervals_passed": 2030,
+        "unresolved_intervals": 0,
+        "poses_checked": 4312,
+        "max_outside_area": 0.0,
+        "arithmetic": "floating point; not a formal certificate",
+        "endpoints_in_separate_arms": true
+      }
+    },
+    {
+      "search_area": 2.236431411002653,
+      "reconstructed_area": 2.2052185892963863,
+      "construction": {
+        "intervals": 2030,
+        "target_displacement": 0.002,
+        "radius_bound": 2.444196125972076,
+        "roundoff_margin": 1e-08
+      },
+      "verification": {
+        "status": "bounded_numerical_pass",
+        "area": 2.2052185892963863,
+        "intervals_passed": 2030,
+        "unresolved_intervals": 0,
+        "poses_checked": 4312,
+        "max_outside_area": 0.0,
+        "arithmetic": "floating point; not a formal certificate",
+        "endpoints_in_separate_arms": true
+      }
+    }
+  ],
+  "neural": {
+    "status": "guiding",
+    "ready": true,
+    "training_rows": 1181,
+    "holdout_rows": 317,
+    "holdout_rmse": 0.2551113001093421,
+    "constant_baseline_rmse": 0.5573277073845169,
+    "epochs": [
+      89,
+      46,
+      27
+    ],
+    "fit_seconds": 0.5953923999913968,
+    "note": "Candidate holdout selects epochs and gates guidance; not an independent test set. Ensemble spread is a heuristic, not calibrated confidence.",
+    "unique_rows": 1498,
+    "loaded_rows": 0,
+    "loaded_models": 0,
+    "fits_this_run": 13,
+    "guided_evaluations": 528,
+    "exploration_evaluations": 233,
+    "predictions_ranked": 8448,
+    "training_seconds": 3.1135105000284966,
+    "last_absolute_prediction_error": 1.0749063708710707,
+    "label": "sampled search area; not validated area",
+    "directory": "C:\\Users\\Santiago\\Desktop\\Evolving-Moving-Sofa-Problem\\moving_sofa_v3\\results\\comparison_20261026_121015_996452\\learning\\seed064_5d422be7"
+  }
+}

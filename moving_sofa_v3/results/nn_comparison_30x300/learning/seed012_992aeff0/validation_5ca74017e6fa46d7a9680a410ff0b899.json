@@ -1,0 +1,95 @@
+{
+  "run_id": "5ca74017e6fa46d7a9680a410ff0b899",
+  "validated_area": 2.0181948664876,
+  "motion": {
+    "kind": "cubic",
+    "times": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      0.875,
+      1.0
+    ],
+    "poses_radians": [
+      [
+        -0.8159464661096274,
+        1.0,
+        0.0
+      ],
+      [
+        -0.7791030699989959,
+        1.104447791476583,
+        0.44752528780293016
+      ],
+      [
+        -0.5975343765419142,
+        1.0946434342924112,
+        0.8921711948700187
+      ],
+      [
+        -0.3319352328578475,
+        1.149774525802371,
+        1.2653634726818348
+      ],
+      [
+        -0.17441604918873965,
+        1.0333213702004684,
+        1.4225681796862877
+      ],
+      [
+        0.0,
+        0.8442788469813076,
+        1.5707963267948966
+      ]
+    ]
+  },
+  "finalists": [
+    {
+      "search_area": 2.0386864211453424,
+      "reconstructed_area": 2.0181948664876,
+      "construction": {
+        "intervals": 1026,
+        "target_displacement": 0.003,
+        "radius_bound": 1.815972047538511,
+        "roundoff_margin": 1e-08
+      },
+      "verification": {
+        "status": "bounded_numerical_pass",
+        "area": 2.0181948664876,
+        "intervals_passed": 1026,
+        "unresolved_intervals": 0,
+        "poses_checked": 2304,
+        "max_outside_area": 0.0,
+        "arithmetic": "floating point; not a formal certificate",
+        "endpoints_in_separate_arms": true
+      }
+    }
+  ],
+  "neural": {
+    "status": "guiding",
+    "ready": true,
+    "training_rows": 238,
+    "holdout_rows": 60,
+    "holdout_rmse": 0.34488777042521007,
+    "constant_baseline_rmse": 0.6184127992162894,
+    "epochs": [
+      31,
+      34,
+      25
+    ],
+    "fit_seconds": 0.11473158300032082,
+    "note": "Candidate holdout selects epochs and gates guidance; not an independent test set. Ensemble spread is a heuristic, not calibrated confidence.",
+    "unique_rows": 298,
+    "loaded_rows": 0,
+    "loaded_models": 0,
+    "fits_this_run": 3,
+    "guided_evaluations": 73,
+    "exploration_evaluations": 28,
+    "predictions_ranked": 1168,
+    "training_seconds": 0.3073208269997849,
+    "last_absolute_prediction_error": 0.34519275299923846,
+    "label": "sampled search area; not validated area",
+    "directory": "results/nn_comparison_30x300/learning/seed012_992aeff0"
+  }
+}

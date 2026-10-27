@@ -1,0 +1,57 @@
+{
+  "config": {
+    "seed": 0,
+    "budget": 1500,
+    "controls": 5,
+    "samples": 49,
+    "target": 0.002,
+    "local": true,
+    "adaptive": true,
+    "fixed_angles": false,
+    "surrogate": false,
+    "finalists": 3,
+    "nn_directory": null,
+    "nn_reuse": true,
+    "nn_minimum": 64,
+    "nn_retrain": 64,
+    "nn_epochs": 100
+  },
+  "seeds": 5,
+  "methods": {
+    "V3": {
+      "surrogate": false
+    },
+    "V3_NN": {
+      "surrogate": true
+    }
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "shapely": "2.2.0",
+      "matplotlib": "3.10.8",
+      "scikit-learn": "1.8.0"
+    },
+    "source_sha256": {
+      "sofa_v3/__init__.py": "af2f13adf18308214917459c857dc08b88796003d38c4976c553844602d265b0",
+      "sofa_v3/baseline.py": "caa9fcc32905c2689c35a4c424a8967b465aa9222515a14cb83f767cfd1b8730",
+      "sofa_v3/experiments.py": "e68fd89a3e3da31d956547b0215bc6f84e3dfd1847682a74e19852d0547bcc0a",
+      "sofa_v3/geometry.py": "294dbc1bc5a0d1160628c1cfc38090788d9ab084d5804a120bb5e969f97bd719",
+      "sofa_v3/gui.py": "d5617cc34bb3910bbefc5c5acc08bcfadfb47628f902843a16875d82ac871977",
+      "sofa_v3/io.py": "e29d5152a3df51625708247ed467633320b8815b41d35382a56a6e55d8b998f4",
+      "sofa_v3/motion.py": "376653564c93fcb6a2fa79839600735fc661c0297bd19c64bf819976a802acdc",
+      "sofa_v3/neural.py": "9aa3d623108a85f7462a80681ea38ed27be509ee1a093d420d4c6d9854786f57",
+      "sofa_v3/reference.py": "564067782254292f10a6fa2d8cb526a2094c3852ce0b4a36bd3a563ce563ffcf",
+      "sofa_v3/search.py": "d85240ba92e74dad12a06a0befc5c7f49df1ca6b8301bc4cba4f0d68658a7e22",
+      "sofa_v3/verify.py": "3b9a74af4fd21a2451b68f0fecbc340f31dfe12381bfa48d7a65964fe4d6c4e6",
+      "run_v3.py": "6ad6fa168a4c4e49c85859212df99a55094cb2670b2feaa58c87227692b455b7",
+      "legacy_v1/sofa_freeform_optimizer_gui.py": "ff612c2429fbdc0eeef92878f9e037aafb0201052bdfc30597d42d230a66442c"
+    }
+  },
+  "budget_definition": "Candidate objective evaluations; initial candidates included. Finalist reconstruction/verification and adaptive probes are separate overhead.",
+  "comparison": "V3 vs V3+NN, fresh learning per seed, identical spline/search settings, no pretraining. Includes training and final verification runtime.",
+  "reference_shapes_in_discovery": false
+}

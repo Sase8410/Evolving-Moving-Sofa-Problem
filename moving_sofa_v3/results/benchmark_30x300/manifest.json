@@ -1,0 +1,45 @@
+{
+  "config": {
+    "seed": 0,
+    "budget": 300,
+    "controls": 5,
+    "samples": 49,
+    "target": 0.003,
+    "local": true,
+    "adaptive": true,
+    "fixed_angles": false,
+    "surrogate": false,
+    "finalists": 1
+  },
+  "seeds": 30,
+  "methods": {
+    "V1": {},
+    "V3": {}
+  },
+  "environment": {
+    "python": "3.12.14 (main, Aug 25 2026, 14:00:49) [Clang 22.1.3 ]",
+    "platform": "Linux-6.18.55-x86_64-with-glibc2.39",
+    "packages": {
+      "numpy": "2.3.5",
+      "scipy": "1.17.0",
+      "shapely": "2.2.0",
+      "matplotlib": "3.10.8"
+    },
+    "source_sha256": {
+      "sofa_v3/__init__.py": "1a19c2e5f5498a523dfdbed6fbf35276bbf68d28b381bc32f923f660d40944f9",
+      "sofa_v3/baseline.py": "caa9fcc32905c2689c35a4c424a8967b465aa9222515a14cb83f767cfd1b8730",
+      "sofa_v3/experiments.py": "d46f48a02f9c3b5f473f4b46b8e680f0be4f10696fb018a467bf5e8ff0a1df00",
+      "sofa_v3/geometry.py": "294dbc1bc5a0d1160628c1cfc38090788d9ab084d5804a120bb5e969f97bd719",
+      "sofa_v3/gui.py": "b494c79add0c1ca06e254a8984369f817189c34e9a2e3dca5c2ceb99ade292c9",
+      "sofa_v3/io.py": "f5068af6a9b2bd28283dfd1b77e15a94d7c06bdebb6b7bff08d149029344592e",
+      "sofa_v3/motion.py": "376653564c93fcb6a2fa79839600735fc661c0297bd19c64bf819976a802acdc",
+      "sofa_v3/reference.py": "564067782254292f10a6fa2d8cb526a2094c3852ce0b4a36bd3a563ce563ffcf",
+      "sofa_v3/search.py": "e90b3677f49cb5010f279c54e7d4df87d87c87391e8cc765a0b8b74010c947b1",
+      "sofa_v3/verify.py": "3b9a74af4fd21a2451b68f0fecbc340f31dfe12381bfa48d7a65964fe4d6c4e6",
+      "legacy_v1/sofa_freeform_optimizer_gui.py": "ff612c2429fbdc0eeef92878f9e037aafb0201052bdfc30597d42d230a66442c"
+    }
+  },
+  "budget_definition": "Candidate objective evaluations; initial candidates included. Finalist reconstruction/verification and adaptive probes are separate overhead.",
+  "comparison": "Attached Step 8 candidate search; common V3 final verification.",
+  "reference_shapes_in_discovery": false
+}

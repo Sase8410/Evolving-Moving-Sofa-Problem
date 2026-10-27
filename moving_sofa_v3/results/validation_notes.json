@@ -1,0 +1,15 @@
+{
+  "unit_tests": 13,
+  "unit_test_outcome": "passed",
+  "gui_checks": [
+    "Agg render of initial window",
+    "load and display exported result",
+    "playback callback",
+    "close callback"
+  ],
+  "gui_limitations": "Native Windows click-through was not exercised in this Linux environment.",
+  "original_attachments_preserved": 12,
+  "original_attachment_verification": "SHA-256 equality for every original and its legacy_v1 copy",
+  "surrogate_smoke": "results/surrogate_smoke_seed7.json; execution check only, not evidence of improvement",
+  "test_command": "python -m unittest discover -s tests -v"
+}
