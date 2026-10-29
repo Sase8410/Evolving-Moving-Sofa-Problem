@@ -1,3 +1,4 @@
+pass
 import numpy as np
 from shapely.geometry import Polygon
 from .motion import Motion, full_motion
@@ -9,12 +10,15 @@ GERVER_AREA = 2.2195316688
 
 
 def hammersley_motion(controls=65, r=2/np.pi):
+    
+    
     t = np.linspace(0, 1, controls)
     angle = t*np.pi/2
     return Motion(t, np.c_[-r*np.cos(angle), 1+r*np.sin(angle), angle])
 
 
 def hammersley_polygon(points=1001, r=2/np.pi):
+    pass
     a = np.linspace(np.pi, 1.5*np.pi, points)
     b = np.linspace(1.5*np.pi, 2*np.pi, points)
     c = np.linspace(0, -np.pi, 2*points)

@@ -1,0 +1,147 @@
+{
+  "run_id": "208976c1b02f43d89d52a68093ae1d99",
+  "validated_area": 2.189476941056122,
+  "motion": {
+    "kind": "cubic",
+    "times": [
+      0.0,
+      0.25,
+      0.5,
+      0.75,
+      0.875,
+      1.0
+    ],
+    "poses_radians": [
+      [
+        -0.8505184821777543,
+        1.0,
+        0.0
+      ],
+      [
+        -0.7923942693173459,
+        1.1422048635245543,
+        0.36733452321529186
+      ],
+      [
+        -0.6030819224670363,
+        1.2465925887605531,
+        0.8488145189030136
+      ],
+      [
+        -0.16462370682374547,
+        1.2972539946200814,
+        1.4098375886994876
+      ],
+      [
+        -0.03979195585800971,
+        1.3008669451119215,
+        1.5347295178126916
+      ],
+      [
+        0.0,
+        1.299723691097853,
+        1.5707963267948966
+      ]
+    ]
+  },
+  "finalists": [
+    {
+      "search_area": 2.228950050725424,
+      "reconstructed_area": 2.189476941056122,
+      "motion": {
+        "kind": "cubic",
+        "times": [
+          0.0,
+          0.25,
+          0.5,
+          0.75,
+          0.875,
+          1.0
+        ],
+        "poses_radians": [
+          [
+            -0.8505184821777543,
+            1.0,
+            0.0
+          ],
+          [
+            -0.7923942693173459,
+            1.1422048635245543,
+            0.36733452321529186
+          ],
+          [
+            -0.6030819224670363,
+            1.2465925887605531,
+            0.8488145189030136
+          ],
+          [
+            -0.16462370682374547,
+            1.2972539946200814,
+            1.4098375886994876
+          ],
+          [
+            -0.03979195585800971,
+            1.3008669451119215,
+            1.5347295178126916
+          ],
+          [
+            0.0,
+            1.299723691097853,
+            1.5707963267948966
+          ]
+        ]
+      },
+      "construction": {
+        "intervals": 676,
+        "target_displacement": 0.004,
+        "radius_bound": 1.8459412542684794,
+        "roundoff_margin": 1e-08
+      },
+      "verification": {
+        "status": "bounded_numerical_pass",
+        "area": 2.189476941056122,
+        "intervals_passed": 676,
+        "unresolved_intervals": 0,
+        "poses_checked": 1604,
+        "max_outside_area": 0.0,
+        "arithmetic": "floating point; not a formal certificate",
+        "endpoints_in_separate_arms": true
+      }
+    }
+  ],
+  "neural": {
+    "status": "guiding",
+    "ready": true,
+    "training_rows": 227,
+    "holdout_rows": 54,
+    "holdout_rmse": 0.3767881512602811,
+    "constant_baseline_rmse": 0.5661974155984728,
+    "top_half_ranking_accuracy": 0.8376068376068376,
+    "ranking_pairs": 351,
+    "epochs": [
+      43,
+      70,
+      46
+    ],
+    "fit_seconds": 0.2152253940000719,
+    "note": "Candidate holdout selects epochs and gates guidance; not an independent test set. Ensemble spread is a heuristic, not calibrated confidence.",
+    "unique_rows": 598,
+    "loaded_rows": 0,
+    "loaded_models": 0,
+    "fits_this_run": 4,
+    "guided_evaluations": 32,
+    "exploration_evaluations": 12,
+    "predictions_ranked": 512,
+    "training_seconds": 0.5903563180002038,
+    "last_absolute_prediction_error": 0.15152218601446155,
+    "fallback_count": 2,
+    "fallback_remaining": 34,
+    "validated_loss_model": {
+      "ready": false,
+      "rows": 1,
+      "status": "collecting validated finalists"
+    },
+    "label": "sampled search area; not validated area",
+    "directory": "results/v32_release_study/equal_evaluations/learning/seed115_18de9f04"
+  }
+}

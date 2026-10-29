@@ -1,190 +1,192 @@
-# Moving Sofa V3.1: neural-guided search
+# Moving Sofa V3.2
 
-V3 optimizes independent continuous translation and rotation splines, reconstructs
-freeform geometry from inverse hallway intersections, and checks the resulting
-rigid motion with conservative displacement bounds. This update extends your V3 directly; V2 is not required. The optional V1
-comparison files remain unchanged in `legacy_v1/`.
+A numerical optimization project that discovers a connected rigid shape and a
+continuous motion through an L-shaped hallway. V3 is the default optimizer;
+neural guidance is an optional experiment. Neither discovery mode starts from
+Gerver's or Hammersley's known shape.
 
-## Start the GUI
+![Desktop interface](assets/v32_gui.png)
 
-Install Python 3.10 or newer, extract the entire ZIP, and install the dependencies:
+## Start here — Windows / VS Code
 
-```bash
-python -m pip install -r requirements.txt
-python run_v3.py
-```
+1. Use Python 3.10 or newer. Run `install_windows.bat` once, or run
+   `python -m pip install -r requirements.txt`.
+2. Double-click `launch_windows.bat`, or open `run_v3.py` in VS Code and click
+   **Run Python File**. No terminal input is required after launch.
+3. Click **Search V3**. The default is 1,500 evaluations, tolerance 0.002, no
+   runtime cap. Both baseline and NN results now save automatically.
+4. Use **Play / pause** to see the complete entry, turn and exit. Use **Load
+   result** to open your old V3/V3.1 JSON files or the included examples.
 
-You can also open `run_v3.py` in VS Code and click **Run Python File**. No terminal
-input is required after launch. Keep `sofa_v3/` beside the launcher. Click **Train + search NN** to collect
-simulation data, train the networks, and guide the search automatically. No
-separate training dataset or GPU is needed. **Search V3 baseline** runs ordinary
-V3 with learning disabled. **Compare NN / V3** runs a fresh paired experiment
-with an editable seed count (30 by default). The budget and seed are editable.
-The window also provides Hammersley check, Stop, Play/pause, Save result and
-Load result. Search runs in a background thread; Stop interrupts training,
-reconstruction and verification. See [NN_GUIDE.md](NN_GUIDE.md) for the full workflow.
+If Python lacks a GUI backend, install Tk support for that Python installation.
+`sofa_v3/` must remain beside `run_v3.py`. Run the launcher from this extracted
+folder; V1 and V2 are not prerequisites. `legacy_v1/` is retained only for the
+optional historical baseline comparison.
 
-NN searches automatically save their result, candidate journal, training
-diagnostics and numeric model checkpoint inside `results/nn_learning/`.
-Leave **Reuse saved NN learning** checked to reuse compatible data and weights
-next time; uncheck it to start fresh. This reuses learned rankings, not the
-previous optimizer population. Baseline searches still use **Save result**.
-Your existing V3 JSON results load without conversion. `legacy_v1/` is needed
-only for the optional old V1 benchmark, not NN search or NN/V3 comparison.
+## What the final update changes
 
-If your Python installation lacks a desktop GUI backend, install Tk support
-for that Python installation. The original GUIs remain available in `legacy_v1/`.
+- **Diverse finalists:** keep a pool of up to `max(12, 4 × finalists)` motions.
+  Nearby motions are merged using RMS pose distance on a common 33-point grid,
+  so slightly different floating-point coordinates no longer consume every slot.
+- **Progressive selection:** re-evaluate the pool on nested 97- and 193-point
+  grids with the default 49-point search objective. Reduce the shortlist, then
+  reconstruct and verify its finalists. Select the largest passing result.
+  Search itself still optimizes sampled area; these refinements improve final
+  selection and do not turn sampled area into a certificate.
+- **Stricter neural gate:** require both lower held-out error than a constant
+  predictor and at least 60% pairwise ordering accuracy among the strongest half
+  of held-out candidates. These are operational gates, not independent tests.
+- **Automatic fallback:** pause guidance for 64 proposals when its recent mean
+  accepted improvement does not beat ordinary proposals. This comparison is a
+  heuristic because the two streams visit different states.
+- **Learned reconstruction loss:** store every passing finalist separately in
+  `validated_training.json`. On a later compatible run, a small ridge model may
+  correct the MLP's score using predicted reconstruction loss. It requires at
+  least 32 distinct rows, sufficient holdout data and a held-out improvement
+  over constant loss. Until then, it stays off. Predicted loss never establishes
+  feasibility or replaces geometry validation.
+- **Final-study workflow:** paired evaluation budgets, common total runtime
+  caps, fixed-motion tolerance refinement and a separate shifted-grid audit.
+- **Release usability:** automatic baseline saves, validated file loading,
+  Windows launchers, visible tolerance/time controls and regression tests.
 
-## What changed
+The default remains V3. Do not interpret the NN's presence as proof that it
+improves area, speed or reliability. See `RELEASE_RESULTS.md` for measured results.
 
-| Module | Responsibility |
+## Buttons and files
+
+| Control | What it does |
 |---|---|
-| `motion.py` | Natural cubic splines for x, y and angle; exact polynomial derivative extrema in floating point; knot insertion |
-| `geometry.py` | Inverse hallway intersections, retained concavities/holes, adaptive interval resolution and conservative reconstruction |
-| `search.py` | Differential evolution, bounded Powell refinement, contact-guided knot insertion, NN-guided candidate evaluation |
-| `neural.py` | Three trained MLPs, held-out error gate, exploration, persistent training data and safe numeric model checkpoints |
-| `verify.py` | Forward geometry checks, independent dense sample grid and recursive clearance bounds |
-| `baseline.py` | Reproduce the attached Step 8 candidate search, then apply the same final validator as V3 |
-| `experiments.py` | Paired seeds, equal objective budgets, resumption, ablations, CSV/JSON summaries and progress plots |
-| `reference.py` | Analytic Hammersley motion and shape approximation, for reference testing only |
-| `gui.py` | Interactive search, playback and exports |
+| Search V3 | Ordinary optimizer with diverse, progressively refined finalists |
+| Search + NN | Collect data, fit/gate proposal ranking, and validate with geometry |
+| Compare NN / V3 | Paired fresh runs using the seed count, budget and optional time cap |
+| Final study | Equal evaluations and equal time caps; refine/audit the best passing result |
+| Refine loaded result | Rebuild the same motion at .004, .002, .001 and .0005; does not reoptimize the motion |
+| Hammersley check | Analytic reference test, explicitly separate from discovery |
+| Stop | Cooperatively interrupt search, training, reconstruction, study or audit |
 
-The attached Step 8 implementation already used inverse hallway intersections.
-The redesign expands the motion representation and optimizer, and strengthens
-validation; it does not claim inverse geometry itself is new.
+Automatic single-run results are in `results/runs/` (baseline/reference) or
+`results/nn_learning/<compatible-schema>/` (NN). The status line shows the path.
+Comparisons/studies use timestamped `results/comparison_.../` folders.
 
-## Search and geometry
+Each experiment contains `manifest.json`, per-seed result JSON, `runs.csv`,
+`summary.json` and `comparison.png`. A final study additionally contains:
 
-The default discovery seed is a simple rotation at a fixed center. Neither
-Hammersley's motion nor Gerver's shape is injected into discovery runs. Each
-turn starts at angle 0 and ends at pi/2. Interior angles vary independently and
-can reverse; symmetry and monotonic rotation are not imposed. Straight entrance
-and exit segments complete the journey between separate hallway arms.
+- `equal_evaluations/` and `equal_time/`;
+- `convergence.json` and `convergence_best.json`;
+- `audit.json` and `final_summary.json`.
 
-Search starts with five spline controls. Differential evolution mixes broad
-random starts and candidates near the seed. Powell refinement improves the
-best result. One additional knot is placed in an interval selected by wall-cut
-probes and curvature, then refined with the remaining budget. This is a
-contact-guided heuristic, not a solver for Gerver's analytic contact equations.
-The optional surrogate ranks proposals; predictions never substitute for real
-geometry evaluations or final verification.
+A compatible NN folder includes `evaluations.jsonl`, `training.jsonl`, numeric
+`model.npz`, `schema.json`, `validated_training.json`, and validation records.
+The source/tolerance schema chooses a new folder for this release. Old learning
+is preserved but deliberately not mixed with changed code or tolerances.
+Uncheck **Reuse saved NN learning** to start fresh. Only one writer may use a
+learning folder. After a crash, close that process before removing its stale
+`active.lock`, or use a new folder.
 
-Hallway intersections retain every component until clipping finishes, then
-select the largest connected polygon. No convex hull replaces a sofa, and holes
-are not filled. Boundary resolution grows as more wall constraints are added.
-Coarse **search area** is only an objective value: it can exceed the true optimum
-because intermediate constraints are missing. Only **validated area** should be
-used in performance statements.
-
-## What validation means
-
-For a point at radius at most R from the local origin, its speed is bounded by
-
-`sqrt(max|x'|² + max|y'|²) + R max|angle'|`.
-
-For each interval of duration h, its displacement from the midpoint is at most
-`h * speed_bound / 2`. Reconstruction intersects the inverse hallway inset by
-that displacement plus a numerical margin. The inset uses straight walls and a
-conservative square exclusion at the concave corner, avoiding inscribed circular
-buffer approximations. Refinement continues until the displacement bound is
-below the requested target. A smaller target usually retains more area and costs
-more time. Exact straight translations within a common convex arm need only
-endpoint containment; this avoids unnecessary interval subdivision.
-
-The final checker separately transforms the sofa forward and measures its
-distance to the original hallway boundary. It recursively proves each interval
-clear under the same motion-speed inequality, also checking a separate regular
-pose grid. The forward checker does not use the reconstruction inset. The two
-paths share the motion-bound routine, which is covered by derivative tests.
-Endpoint occupancy, connectedness and polygon validity are checked. A recursion
-limit produces `inconclusive`, never a pass. Failed results have
-`validated_area: null`.
-
-`bounded_numerical_pass` is a conservative **floating-point numerical check**,
-not an exact-arithmetic or formally verified certificate. Shapely/GEOS and SciPy
-use floating-point arithmetic. In addition, search has finite controls, bounded
-translations, a local shape window x in [-3,3], y in [-2,1], and hallway arms of
-length 8. These are explicit computational restrictions; there is no global
-convergence guarantee.
-
-## Reproduce experiments
+## Reproduce results
 
 ```bash
-# One discovery run, with no reference shape supplied
-python run_v3.py search --budget 4000 --seed 42 --target .001
+# One normal discovery run
+python run_v3.py search --budget 1500 --seed 100
 
-# Reproduce an ablated search directly
-python run_v3.py search --budget 1500 --fixed-angles
-python run_v3.py search --budget 1500 --no-adaptive
+# Optional fresh neural experiment
+python run_v3.py search --budget 1500 --seed 100 --surrogate --fresh-nn
 
-# Known reference: checks representational and validation accuracy, not discovery
-python run_v3.py reference --target .0005
+# Paired equal-evaluation comparison
+python run_v3.py compare-nn --budget 1500 --seed 100 --seeds 30 --output results/new_comparison
 
-# Paired V1/V3 comparison; each seed gets the same search-evaluation budget
-python run_v3.py benchmark --seeds 30 --budget 1500 --output results/full_comparison
+# Common total runtime cap, including training and final validation
+python run_v3.py compare-nn --budget 100000 --seconds 30 --seed 100 --seeds 30 --output results/new_timed
 
-# Also disable local refinement, adaptive controls, or angle optimization
-python run_v3.py benchmark --seeds 30 --budget 1500 --ablations --output results/ablations
+# Complete study with GUI-equivalent controls
+python run_v3.py final-study --budget 1500 --seed 100 --seeds 30 --seconds 30 --output results/new_study
 
-# NN search with persistent learning (scikit-learn is included in requirements)
-python run_v3.py search --budget 1500 --surrogate
+# Rebuild a saved trajectory at successively tighter tolerances
+python run_v3.py convergence --input results/my_result.json
 
-# A genuinely fresh neural-versus-V3 comparison; includes training runtime
-python run_v3.py compare-nn --seeds 30 --budget 300 --finalists 1 --target .003 --output results/my_nn_comparison
-
-# New learning dataset/model, independent of previously saved learning
-python run_v3.py search --budget 1500 --surrogate --fresh-nn
+# Additional independent sampled audit
+python audit_export.py results/my_result.json --samples 5001
 
 python -m unittest discover -s tests -v
-
-# Separate shifted-grid audit of the saved high-area result
-python audit_export.py results/discovery_4000_seed42.json
 ```
 
-The benchmark counts the initial objective evaluation and every candidate
-evaluation. Neural predictions do not count because they perform no geometry
-evaluation. Finalist rebuilding/verification and the adaptive contact probe are
-separate overhead; search and total runtimes are both reported. Equal evaluation
-counts do **not** mean equal computational cost: the representations and number
-of hallway intersections differ. Use runtime as a second comparison axis.
+The included `assets/demo.mp4` shows a saved discovered result moving through
+the hallway. Regenerate it with `python render_demo.py result.json assets/demo.mp4`
+(requires ffmpeg), or choose a `.gif` output.
 
-The V1 comparator is specifically the attached
-`sofa_freeform_optimizer_gui.py` (Step 8), not an unavailable later version or a
-historical scalar score. Its random sequence, acceptance rule and candidate
-areas are tested against the original. Both methods use common conservative
-final reconstruction and verification, so V1's final metric differs from its
-original sampled-check output. The attachment files themselves are unmodified.
+The no-argument launcher opens the GUI. `--no-diversity` and
+`--no-progressive` support selection ablations; existing `--no-local`,
+`--no-adaptive` and `--fixed-angles` remain available. These ablations are not a
+byte-for-byte V3.1 implementation; the original ZIP preserves that version.
 
-Each experiment directory has a settings/environment/source-hash manifest,
-per-seed JSON including full progress curves and motions, `runs.csv`,
-`summary.json` and `comparison.png`. A rerun resumes completed records only if
-the settings and source hashes match. Choose a new directory after changing
-the code. Alternating method order reduces systematic execution-order bias.
-Summaries report feasibility, best/mean/median area, sample standard deviation,
-runtimes and a paired bootstrap interval. Failed runs are excluded from the
-conditional area mean and included as zero in a separately labeled mean.
+## Fair comparisons and stopping
 
-## Mathematical target and attribution
+Equal-evaluation studies use the same number of candidate objective calls.
+Promotion, training, adaptive probes, reconstruction and validation have real
+costs; total runtimes are reported. Promotion counts are recorded separately.
+Equal-evaluation counts alone do not establish equal computational cost.
 
-The goal is independent numerical reproduction toward Gerver, not a claim to
-exceed the standard moving-sofa optimum. Baek's paper was submitted to arXiv on
-29 November 2024 and states the proof of Gerver's optimality. An arXiv DOI is
-not itself evidence of journal publication.
+Time-limited studies allocate 55% of the common wall-time cap to search (with
+proportional global/local/adaptive phases), leaving the rest for selection and
+validation. Only completed checks can supply a validated result. With short
+caps, a run may end without one; failures remain in the success rate and in the
+mean that counts failures as zero. A previously completed valid finalist may be
+returned if later validation times out. There is no guarantee that all
+finalists finish within the cap.
 
-- Jineon Baek, *Optimality of Gerver's Sofa*: https://arxiv.org/abs/2411.19826
-- Kuangdai Leng et al., *Deep Learning Evidence for Global Optimality of Gerver's
-  Sofa*: https://arxiv.org/abs/2407.11106
-- Dan Romik, constructions and background: https://danromik.com/pages/sofas.html
+Caps are cooperative, not hard real-time guarantees: an indivisible numerical
+operation, library import or output write can overrun. Numerical-work overrun
+is reported explicitly; final file serialization is outside that clock. Use
+the same idle machine, avoid other CPU-heavy jobs and inspect actual runtimes.
+The search-curve plot shows the common evaluation prefix for variable-length
+runs; it is not a validated-area-versus-time curve.
 
-The neural-network paper motivates independent time-dependent translation and
-rotation. V3 uses our own SciPy spline, polygon clipping and optimizer
-implementation; it is not a reproduction of that paper's neural training or
-differentiable waterfall algorithm. The Hammersley reference has analytic area
-`pi/2 + 2/pi = 2.207416099...`; Gerver's reference is approximately
-`2.2195316688`. Neither reference is evidence that discovery reached that area.
-The historical 1.53945 baseline and the claimed V2 0.92% improvement were not
-supplied as result artifacts and are not treated as verified measurements here.
+Fresh comparisons never reuse training across paired seeds. Warmed-up learned
+reconstruction-loss correction is a separate mode and is not established by a
+cold-start benchmark. Benchmark manifests include settings, source hashes and
+dependency versions. Resume only with matching settings/source; choose a new
+output directory after an update. Stopping retains completed run files.
 
-See `NN_RESULTS.md` for the measurements completed for V3.1.
-`RESULTS.md` and the original result directories preserve the previous V3
-measurements; those results did not use this neural implementation.
+## Numerical meaning and limitations
+
+The optimizer uses differential evolution, Powell refinement and an adaptive
+spline knot. Independent x, y and rotation splines allow nonsymmetric motions
+and rotation reversal. Inverse hallway intersections retain concavities and
+holes and select a connected polygon. No convex hull replaces the sofa.
+
+**Search area is unverified. Use validated area for project metrics.** Conservative
+reconstruction uses midpoint displacement bounds, then a forward checker uses
+clearance bounds and a separate pose grid. `bounded_numerical_pass` means the
+floating-point bounded checker passed; it is not an exact mathematical proof.
+Adjacent exported motion segments must join continuously. Disconnected,
+inconclusive, invalid, collided or unfinished candidate checks never supply a
+validated area. The independent audit is an additional sampled implementation check.
+
+The code uses finite controls, bounded translations, an eight-unit finite
+hallway and a finite local shape window. It has no global convergence guarantee.
+Tightening reconstruction tolerance on a fixed motion studies numerical area
+loss; it does not establish optimizer convergence, a rigorous remaining-error
+bound, or independent reproduction of Gerver's analytic construction. The
+reference constants and attribution remain in `README_V3_1.md`.
+
+A complete release means reproducible experiments, numerical checks, a usable
+interface and documented limitations. Further pursuit of a larger validated
+area is optional research. An inconclusive or negative NN comparison is a
+valid experimental result.
+
+## Project structure
+
+| File | Role |
+|---|---|
+| `run_v3.py`, `sofa_v3/gui.py` | CLI and desktop controls |
+| `sofa_v3/search.py` | Search, diverse archive, promotion and validated selection |
+| `sofa_v3/neural.py`, `calibration.py` | Sampled-area MLP, gates/fallback, validated-loss model |
+| `sofa_v3/motion.py`, `geometry.py`, `verify.py` | Spline motion, reconstruction and bounded numerical checking |
+| `sofa_v3/experiments.py`, `study.py` | Paired experiments, convergence and release study |
+| `audit_export.py` | Independent interpolation/transform sampled audit |
+| `tests/` | Geometry, reproducibility, NN lifecycle and release regression checks |
+| `legacy_v1/` | Unmodified historical files |
+
+Historical `RESULTS.md`, `NN_RESULTS.md`, and `README_V3_1.md` describe earlier
+versions. Use `RELEASE_RESULTS.md` for this release's measurements.

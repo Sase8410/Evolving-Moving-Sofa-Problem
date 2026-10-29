@@ -37,7 +37,7 @@ def create_candidate(shape, width=1.5, height=0.6,
         raise ValueError("Notch depth must be greater than 0 and less than height.")
 
     if shape == "notched":
-        # Walk around the boundary, including the inward bottom notch.
+        
         return make_sofa([
             [-a, -b], [-a / 3, -b],
             [-a / 3, -b + notch_depth], [a / 3, -b + notch_depth],
@@ -47,8 +47,8 @@ def create_candidate(shape, width=1.5, height=0.6,
     if shape == "curved":
         if not isinstance(curve_points, (int, np.integer)) or curve_points < 3:
             raise ValueError("Use at least three points per curve.")
-        # Two elliptical arches form a concave outline.
-        # Straight polygon edges approximate the curves.
+        
+        
         angles = np.linspace(0, np.pi, curve_points)
         outer = np.column_stack((
             a * np.cos(angles), -b + height * np.sin(angles),
@@ -75,7 +75,7 @@ def check_path(sofa, poses):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=None)
     parser.add_argument("--shape", choices=["rectangle", "notched", "curved"],
                         default="curved")
     parser.add_argument("--width", type=float, default=1.5)
@@ -90,7 +90,7 @@ def main():
         sofa = create_candidate(
             args.shape, args.width, args.height, args.notch_depth, args.points,
         )
-        # For a custom shape, replace the call above with make_sofa(vertices).
+        
     except ValueError as error:
         parser.error(str(error))
 

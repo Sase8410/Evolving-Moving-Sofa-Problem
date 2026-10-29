@@ -93,7 +93,7 @@ class SofaWindow:
         self.reset_button.on_clicked(self.reset_path)
 
         self.apply_settings()
-        # Keeping the animation on this object prevents garbage collection.
+        
         self.animation = FuncAnimation(
             self.fig, self.advance, init_func=lambda: (),
             interval=20, blit=False, cache_frame_data=False,
@@ -108,7 +108,7 @@ class SofaWindow:
         self.update_display()
 
     def height_changed(self, _=None):
-        # A notch must remain shallower than the sofa's height.
+        
         limit = round(self.height.val - 0.01, 2)
         self.notch.valmax = limit
         self.notch.ax.set_xlim(self.notch.valmin, limit)

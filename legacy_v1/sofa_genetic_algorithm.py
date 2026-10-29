@@ -97,7 +97,7 @@ def optimize(args, poses):
 
 
 def build_parser():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=None)
     parser.add_argument("--shape", choices=["rectangle", "notched", "curved"],
                         default="curved")
     parser.add_argument("--population", type=int, default=40)

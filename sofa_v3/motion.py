@@ -1,3 +1,4 @@
+pass
 import numpy as np
 from scipy.interpolate import CubicSpline, PPoly
 
@@ -24,6 +25,9 @@ class Motion:
         self.derivative = self.curve.derivative()
 
     def __call__(self, t):
+        
+        
+        
         value = self.curve(t)
         times = np.asarray(t)
         if times.ndim == 0:
@@ -37,6 +41,7 @@ class Motion:
         return value
 
     def speed_bound(self, a, b, radius):
+        pass
         maxima = np.zeros(3)
         d = self.derivative
         first = max(0, np.searchsorted(self.times, a, side="right")-1)
@@ -70,13 +75,27 @@ class Motion:
 
 
 def seed_motion(controls=5):
+    pass
     t = np.linspace(0, 1, controls)
     return Motion(t, np.c_[np.zeros(controls), np.ones(controls), t*np.pi/2])
 
 
 def full_motion(turn):
+    pass
     p, q = turn(0), turn(1)
     if abs(p[2]) > 1e-10 or abs(q[2]-np.pi/2) > 1e-10:
         raise ValueError("Turn must start at 0 and end at pi/2.")
     return [Motion([0, 1], [[-4, p[1], 0], p], "linear"), turn,
             Motion([0, 1], [q, [q[0], 5, np.pi/2]], "linear")]
+
+
+def continuous_parts(parts, tolerance=1e-10):
+    pass
+    if not parts:
+        return False
+    for a,b in zip(parts,parts[1:]):
+        p,q=a(1),b(0)
+        angle=np.arctan2(np.sin(p[2]-q[2]),np.cos(p[2]-q[2]))
+        if np.max(abs(p[:2]-q[:2])) > tolerance or abs(angle) > tolerance:
+            return False
+    return True

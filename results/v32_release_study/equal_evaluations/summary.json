@@ -1,0 +1,43 @@
+{
+  "V3": {
+    "runs": 30,
+    "feasible_runs": 30,
+    "feasible_rate": 1.0,
+    "best_validated_area": 2.1954020124856557,
+    "mean_validated_area": 2.138710570485243,
+    "std_validated_area": 0.03426605564783005,
+    "median_validated_area": 2.140381804826287,
+    "mean_area_failures_as_zero": 2.138710570485243,
+    "mean_search_seconds": 5.1500860166333045,
+    "mean_total_seconds": 7.361718898733269,
+    "mean_evaluations": 600.0,
+    "finalization_timeouts": 0,
+    "max_overrun_seconds": 0.0
+  },
+  "V3_NN": {
+    "runs": 30,
+    "feasible_runs": 30,
+    "feasible_rate": 1.0,
+    "best_validated_area": 2.193589156067339,
+    "mean_validated_area": 2.1598707512980955,
+    "std_validated_area": 0.040141234810485045,
+    "median_validated_area": 2.1766133652069395,
+    "mean_area_failures_as_zero": 2.1598707512980955,
+    "mean_search_seconds": 8.249237310599954,
+    "mean_total_seconds": 10.608952727899995,
+    "mean_evaluations": 600.0,
+    "finalization_timeouts": 0,
+    "max_overrun_seconds": 0.0
+  },
+  "paired_V3_NN_minus_V3": {
+    "valid_pairs": 30,
+    "mean_delta": 0.02116018081285196,
+    "wins": 21,
+    "ties": 0,
+    "bootstrap_95_percent_interval": [
+      0.0006474826205015089,
+      0.03998099662615791
+    ],
+    "note": "Conditional on both runs passing; small-budget results do not establish convergence."
+  }
+}

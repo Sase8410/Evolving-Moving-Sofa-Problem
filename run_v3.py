@@ -1,3 +1,4 @@
+pass
 import argparse
 from pathlib import Path
 from sofa_v3.search import Config, optimize
@@ -5,14 +6,18 @@ from sofa_v3.io import save_json, provenance
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", nargs="?", default="gui", choices=["gui", "search", "reference", "benchmark", "compare-nn"])
+    parser = argparse.ArgumentParser(description='Run with no arguments for the GUI, or use search/reference/benchmark.')
+    parser.add_argument("mode", nargs="?", default="gui", choices=["gui", "search", "reference", "benchmark", "compare-nn", "final-study", "convergence"])
     parser.add_argument("--budget", type=int, default=1500)
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--seeds", type=int, default=30)
     parser.add_argument("--controls", type=int, default=5)
     parser.add_argument("--target", type=float, default=.002)
     parser.add_argument("--finalists", type=int, default=3)
+    parser.add_argument("--seconds", type=float, help="Cooperative total wall-time cap including final validation.")
+    parser.add_argument("--input", type=Path, help="Saved result for convergence study.")
+    parser.add_argument("--no-progressive", action="store_true")
+    parser.add_argument("--no-diversity", action="store_true")
     parser.add_argument("--surrogate", action="store_true")
     parser.add_argument("--nn-dir", type=Path, help="Persistent NN evaluations and numeric model checkpoint.")
     parser.add_argument("--fresh-nn", action="store_true", help="Start fresh; requires a new learning directory.")
@@ -29,13 +34,23 @@ def main():
     if args.surrogate and args.mode == "search" and nn_dir is None:
         from sofa_v3.neural import signature
         import hashlib, json, uuid
-        tag = hashlib.sha256(json.dumps(signature(49),sort_keys=True).encode()).hexdigest()[:10]
+        tag = hashlib.sha256(json.dumps(signature(49,args.target),sort_keys=True).encode()).hexdigest()[:10]
         nn_dir = Path("results/nn_learning")/(uuid.uuid4().hex if args.fresh_nn else tag)
     cfg = Config(seed=args.seed, budget=args.budget, controls=args.controls,
                  target=args.target, finalists=args.finalists, surrogate=args.surrogate,
                  nn_directory=str(nn_dir) if nn_dir else None, nn_reuse=not args.fresh_nn,
                  fixed_angles=args.fixed_angles, adaptive=not args.no_adaptive,
-                 local=not args.no_local)
+                 local=not args.no_local, time_limit=args.seconds,
+                 progressive=not args.no_progressive, diverse=not args.no_diversity)
+    if args.mode == "final-study":
+        from sofa_v3.study import final_study
+        return final_study(cfg, args.seeds, args.output or Path("results/final_study"),
+                           seconds=args.seconds or 30.)
+    if args.mode == "convergence":
+        if args.input is None:
+            parser.error("convergence requires --input result.json")
+        from sofa_v3.study import convergence
+        return convergence(args.input, args.output or args.input.with_name(args.input.stem+"_convergence.json"))
     if args.mode == "reference":
         from sofa_v3.reference import reference_check
         from shapely.geometry import mapping

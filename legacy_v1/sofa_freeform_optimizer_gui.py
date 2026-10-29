@@ -1,11 +1,4 @@
-"""Step 8: free-form sofas from intersections of transformed hallways.
-
-Run this file from your editor. Requires numpy, shapely and matplotlib.
-Standalone: no changes to Steps 2-7. Load a Step 7 JSON with Load route.
-Uses a (1+1) evolutionary route search, followed by finer reconstruction
-and independent denser checks. These are numerical sampled checks, not
-a proof of continuous clearance or of global optimality.
-"""
+pass
 
 import json
 import queue
@@ -53,7 +46,7 @@ def validate_route(route):
 
 
 def refine_waypoints(route):
-    """Add degrees of freedom without changing the seed motion."""
+    pass
     pieces = []
     for a, b in zip(route[:-1], route[1:]):
         n = max(1, int(np.ceil((b[2] - a[2]) / 7.5)))
@@ -94,12 +87,7 @@ def largest_polygon(geometry):
 
 
 def build_sofa(route, distance=.06, angle=3., checkpoint=lambda: None):
-    """Largest polygon component of the sampled feasible intersection.
-
-    Retain ALL components during clipping: a smaller intermediate component
-    could become the largest survivor. Never use a convex hull or fill holes.
-    Full entrance/exit restrictions prevent a partial-turn false solution.
-    """
+    pass
     feasible = local_hallway(ENTRANCE, route[0]).intersection(
         local_hallway(EXIT, route[-1]))
     for pose in sample_route(route, distance, angle):
@@ -132,13 +120,7 @@ def verify_sofa(sofa, route, checkpoint=lambda: None):
 
 
 def clearance_margin(sofa, route):
-    """Bound point travel to a nearest reconstruction sample, in float math.
-
-    Rotation displaces a point by at most radius * angle (in radians).
-    Half an interval suffices because either endpoint can be used. Eroding
-    by this bound reserves room for translation and rotation between poses.
-    This numerical safeguard is not an exact-arithmetic certificate.
-    """
+    pass
     if sofa.is_empty:
         return 0.
     radius = np.linalg.norm(np.asarray(sofa.exterior.coords), axis=1).max()
@@ -152,7 +134,7 @@ class Cancelled(Exception):
 
 
 def optimize(seed_route, iterations, seed, events, stop):
-    """One parent, one mutated offspring, elitist selection; fixed RNG seed."""
+    pass
     def checkpoint():
         if stop.is_set():
             raise Cancelled()
@@ -168,7 +150,7 @@ def optimize(seed_route, iterations, seed, events, stop):
         for i in range(1, iterations + 1):
             checkpoint()
             child = route.copy()
-            # Mutate one waypoint and sometimes a neighbor for smooth changes.
+            
             j = int(rng.integers(1, len(route) - 1))
             scale = (.07 * (1 - i / iterations) + .008)
             delta = rng.normal(0, scale, 2)
@@ -190,8 +172,8 @@ def optimize(seed_route, iterations, seed, events, stop):
         finalists = []
         attempts = []
         for coarse_area, candidate_route in archive:
-            # This is a NEW, smaller geometry; coarse area is never reported
-            # as the verified area of the reconstructed polygon.
+            
+            
             sofa = build_sofa(candidate_route, .006, .3, checkpoint)
             margin = clearance_margin(sofa, candidate_route)
             sofa = largest_polygon(sofa.buffer(-margin))
@@ -227,7 +209,7 @@ def optimize(seed_route, iterations, seed, events, stop):
 
 
 def polygon_path(sofa):
-    """Compound path preserves holes in both local and animated views."""
+    pass
     if sofa.is_empty:
         return PlotPath(np.zeros((1, 2)), [PlotPath.MOVETO])
     sofa = orient(sofa, sign=1)

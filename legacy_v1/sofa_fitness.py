@@ -65,7 +65,7 @@ def evaluate_sofa(sofa, poses, outside_weight=10.0):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=None)
     parser.add_argument("--shape", choices=["rectangle", "notched", "curved"],
                         default="curved")
     parser.add_argument("--width", type=float, default=1.5)

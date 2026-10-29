@@ -1,0 +1,12 @@
+{
+  "features": "motion17-xyz-radians-v1",
+  "samples": 49,
+  "validation_target": 0.004,
+  "label": "sampled_search_area_not_validated",
+  "source": {
+    "motion.py": "007ee773f689abf59687fbe653e07598e058533db91f75c88f4ba1c47fc16829",
+    "geometry.py": "294dbc1bc5a0d1160628c1cfc38090788d9ab084d5804a120bb5e969f97bd719",
+    "neural.py": "6f9c7e3d7fc98ab1629d22425bb22cc561a0ed34e1fe40a98642db387f7da290",
+    "calibration.py": "89fcfb84771c82e98451bd736c3e55e81afa23402f8b6a38d3272ee7f986a661"
+  }
+}

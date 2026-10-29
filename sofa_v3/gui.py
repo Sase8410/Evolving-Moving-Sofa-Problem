@@ -1,3 +1,4 @@
+pass
 import json
 import queue
 import threading
@@ -16,7 +17,7 @@ from .geometry import HALLWAY, world
 from .motion import Motion, full_motion
 from .search import Config, optimize
 from .reference import reference_check
-from .io import save_json, provenance
+from .io import save_json, provenance, load_result
 
 
 def polygon_path(poly):
@@ -39,8 +40,8 @@ class Window:
         self.frame = 0
         self.frames = None
         self.fig = plt.figure(figsize=(13, 9), facecolor="#f8fafc")
-        self.fig.canvas.manager.set_window_title("Moving Sofa V3.1 — Neural Search")
-        self.fig.text(.055, .95, "Moving Sofa V3.1 · Neural Search", fontsize=22, weight="bold", color="#0f172a")
+        self.fig.canvas.manager.set_window_title("Moving Sofa V3.2")
+        self.fig.text(.055, .95, "Moving Sofa V3.2 · Final Release", fontsize=22, weight="bold", color="#0f172a")
         self.fig.text(.055, .915, "Learn from simulations · rank motion proposals · validate with geometry", fontsize=11)
         self.ax = self.fig.add_axes([.045, .39, .46, .49])
         self.ax.add_patch(Patch(np.asarray(HALLWAY.exterior.coords), fc="#e2e8f0", ec="#64748b"))
@@ -52,7 +53,7 @@ class Window:
         self.plot = self.fig.add_axes([.59, .43, .35, .13])
         self.plot.set(xlabel="Evaluation", ylabel="Sampled area")
         self.plot.grid(alpha=.2)
-        self.status = self.fig.text(.055, .335, "Ready. Train + search NN collects data, learns, then guides proposals.", fontsize=10)
+        self.status = self.fig.text(.055, .335, "Ready. Search V3 is the default; neural search remains experimental.", fontsize=10)
         self.nn_status = self.fig.text(.055, .295, "NN: waiting for a run. Predictions are not collision checks.", fontsize=10, color="#115e59")
         self.metrics = self.fig.text(.56, .585, "No result yet.", fontsize=10)
         self.fig.text(.055, .025, "Experimental numerical results. Floating-point validation is not a formal certificate.", fontsize=9, color="#475569")
@@ -60,16 +61,20 @@ class Window:
         self.seed = TextBox(self.fig.add_axes([.31, .22, .07, .045]), "Seed ", initial="0")
         self.seeds = TextBox(self.fig.add_axes([.52, .22, .06, .045]), "Compare seeds ", initial="30")
         self.reuse = CheckButtons(self.fig.add_axes([.65, .215, .30, .055]), ["Reuse saved NN learning"], [True])
+        self.target = TextBox(self.fig.add_axes([.13, .17, .09, .033]), "Tolerance ", initial=".002")
+        self.seconds = TextBox(self.fig.add_axes([.52, .17, .06, .033]), "Time cap (0=off) ", initial="0")
         self.buttons = []
-        actions = [("Train + search NN", lambda _: self.start("neural")),
-                   ("Search V3 baseline", lambda _: self.start("search")),
+        actions = [("Search V3", lambda _: self.start("search")),
+                   ("Search + NN", lambda _: self.start("neural")),
                    ("Compare NN / V3", lambda _: self.start("benchmark")),
+                   ("Final study", lambda _: self.start("study")),
                    ("Hammersley check", lambda _: self.start("reference")),
                    ("Stop", self.cancel), ("Play / pause", self.play),
-                   ("Save result", self.save), ("Load result", self.load)]
+                   ("Save result", self.save), ("Load result", self.load),
+                   ("Refine loaded result", lambda _: self.start("convergence"))]
         for i, (label, callback) in enumerate(actions):
-            x = .055+(i % 4)*.23
-            btn = Button(self.fig.add_axes([x, .135-(i//4)*.065, .20, .045]), label)
+            x = .055+(i % 5)*.18
+            btn = Button(self.fig.add_axes([x, .115-(i//5)*.055, .17, .04]), label)
             btn.on_clicked(callback)
             self.buttons.append(btn)
         self.timer = self.fig.canvas.new_timer(interval=40)
@@ -85,19 +90,23 @@ class Window:
         if self.worker is not None:
             return
         try:
-            cfg = Config(seed=int(self.seed.text), budget=int(self.budget.text))
+            seconds = float(self.seconds.text)
+            cfg = Config(seed=int(self.seed.text), budget=int(self.budget.text),
+                         target=float(self.target.text), time_limit=seconds if seconds != 0 else None)
             cfg.validate()
-            seeds = int(self.seeds.text) if mode == "benchmark" else 30
+            seeds = int(self.seeds.text) if mode in ("benchmark", "study") else 30
             if seeds < 1:
                 raise ValueError("Comparison needs at least one seed.")
             if mode == "neural":
                 from .neural import signature
                 reuse = self.reuse.get_status()[0]
-                tag = hashlib.sha256(json.dumps(signature(cfg.samples),sort_keys=True).encode()).hexdigest()[:10]
+                tag = hashlib.sha256(json.dumps(signature(cfg.samples,cfg.target),sort_keys=True).encode()).hexdigest()[:10]
                 if not reuse:
                     tag = "fresh_"+datetime.now().strftime("%Y%m%d_%H%M%S_%f")
                 directory = Path(__file__).resolve().parents[1]/"results"/"nn_learning"/tag
                 cfg = replace(cfg, surrogate=True, nn_directory=str(directory), nn_reuse=bool(reuse))
+            if mode == "convergence" and self.result is None:
+                raise ValueError("Load or search for a result first.")
         except ValueError as error:
             self.status.set_text(str(error))
             self.fig.canvas.draw_idle()
@@ -116,20 +125,36 @@ class Window:
                 if mode == "reference":
                     result, sofa = reference_check(cfg.target, self.checkpoint)
                     result["geometry"] = mapping(sofa)
-                elif mode == "benchmark":
+                elif mode in ("benchmark", "study", "convergence"):
                     from .experiments import benchmark
                     folder = Path(__file__).resolve().parents[1]/"results"/("comparison_"+datetime.now().strftime("%Y%m%d_%H%M%S_%f"))
-                    benchmark(cfg, seeds, folder, progress=lambda msg:self.events.put(("status",msg)),
-                              checkpoint=self.checkpoint, neural=True)
-                    self.events.put(("status", "Comparison saved to "+str(folder)))
+                    progress = lambda msg:self.events.put(("status",msg))
+                    if mode == "study":
+                        from .study import final_study
+                        final_study(cfg, seeds, folder, seconds=cfg.time_limit or 30.,
+                                    progress=progress, checkpoint=self.checkpoint)
+                    elif mode == "convergence":
+                        from .study import convergence
+                        save_json(folder/"input.json", self.result)
+                        report = convergence(folder/"input.json", folder/"convergence.json",
+                                             progress=progress, checkpoint=self.checkpoint)
+                        if report["best_result"]:
+                            self.events.put(("done",load_result(report["best_result"])))
+                    else:
+                        benchmark(cfg, seeds, folder, progress=progress,
+                                  checkpoint=self.checkpoint, neural=True)
+                    self.events.put(("status", "Saved "+str(folder)))
                     return
                 else:
                     result = optimize(cfg, lambda row:self.events.put(("progress",row)), self.checkpoint)
                 result["environment"] = provenance()
                 if mode == "neural":
                     path = Path(cfg.nn_directory)/("result_"+datetime.now().strftime("%Y%m%d_%H%M%S_%f")+".json")
-                    save_json(path, result)
+                else:
+                    path = Path(__file__).resolve().parents[1]/"results"/"runs"/(mode+"_"+datetime.now().strftime("%Y%m%d_%H%M%S_%f")+".json")
+                save_json(path, result)
                 self.events.put(("done",result))
+                self.events.put(("status", "Saved "+str(path)))
             except Exception as error:
                 self.events.put(("status",str(error)))
             finally:
@@ -161,7 +186,7 @@ class Window:
                               else f"No validated result: {check.get('status','unknown')}")
         self.status.set_text("Known Hammersley reference — not a discovery result." if "reference" in result
                              else "Finished. NN data, model (when trained), and result saved automatically." if "neural" in result
-                             else "Finished. Play the motion or save the result.")
+                             else "Result loaded. Play the motion or refine its reconstruction.")
         self.show_neural(result.get("neural"))
         if "history" in result:
             self.plot.clear()
@@ -236,7 +261,7 @@ class Window:
             root = Tk(); root.withdraw()
             name = filedialog.askopenfilename(filetypes=[("V3 JSON result","*.json")])
             if name:
-                self.display(json.loads(Path(name).read_text(encoding="utf-8")))
+                self.display(load_result(name))
         except Exception as error:
             self.status.set_text("Could not load result: "+str(error))
         finally:

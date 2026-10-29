@@ -1,0 +1,12 @@
+{
+  "source_file": "results/v32_release_study/convergence_best.json",
+  "area": 2.2152514155814482,
+  "samples_checked": 6009,
+  "colliding_samples": 0,
+  "max_outside_area": 0.0,
+  "endpoints_in_separate_arms": true,
+  "continuous_segments": true,
+  "sampled_audit_passed": true,
+  "method": "Separate SciPy interpolators and shapely.affinity rotate/translate; shifted time grid.",
+  "limitation": "Additional floating-point sampled audit, not a formal certificate."
+}

@@ -1,3 +1,4 @@
+pass
 import numpy as np
 from shapely.affinity import affine_transform
 from shapely.geometry import Polygon, box
@@ -7,11 +8,13 @@ LENGTH = 8.0
 HALLWAY = unary_union([box(-LENGTH, 0, 1, 1), box(0, 0, 1, LENGTH)])
 ENTRANCE = box(-LENGTH, 0, 0, 1)
 EXIT = box(0, 1, 1, LENGTH)
+
 SEARCH_BOX = box(-3, -2, 3, 1)
 EPS = 1e-8
 
 
 def straight_arm(motion):
+    pass
     if motion.kind != "linear" or len(motion.times) != 2:
         return None
     p, q = motion.poses
@@ -53,6 +56,7 @@ def radius_bound(g):
 
 
 def inset_hallway(delta):
+    pass
     if not 0 <= delta < .5:
         return Polygon()
     return unary_union([box(-LENGTH+delta, delta, 1-delta, 1-delta),
@@ -65,8 +69,11 @@ def endpoint_region(parts, margin=0):
 
 
 def reconstruct(parts, samples=49, checkpoint=lambda: None, all_components=False):
+    pass
     feasible = endpoint_region(parts)
     for motion in parts:
+        
+        
         times = np.unique(np.r_[motion.times, np.linspace(0, 1, samples)])
         if motion.kind == "linear" and len(motion.times) == 2:
             times = [0., 1.]
@@ -79,6 +86,7 @@ def reconstruct(parts, samples=49, checkpoint=lambda: None, all_components=False
 
 
 def bounded_intervals(motion, radius, target, checkpoint=lambda: None):
+    pass
     todo = list(zip(motion.times[:-1], motion.times[1:]))[::-1]
     while todo:
         checkpoint()
@@ -103,12 +111,16 @@ def reconstruct_conservative(parts, target=.002, checkpoint=lambda: None):
     for motion in parts:
         arm = straight_arm(motion)
         if arm is not None:
+            
+            
             for t in [0., 1.]:
                 checkpoint()
                 feasible = feasible.intersection(local(arm.buffer(-EPS), motion(t)))
             count += 1
             continue
         for a, b, bound in bounded_intervals(motion, radius, target, checkpoint):
+            
+            
             feasible = feasible.intersection(local(inset_hallway(bound+EPS), motion((a+b)/2)))
             count += 1
             if feasible.is_empty:
@@ -120,6 +132,7 @@ def reconstruct_conservative(parts, target=.002, checkpoint=lambda: None):
 
 
 def contact_refinement_time(turn, sofa):
+    pass
     scores = []
     for a, b in zip(turn.times[:-1], turn.times[1:]):
         ts = np.linspace(a, b, 7)[1:-1]

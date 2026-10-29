@@ -1,0 +1,43 @@
+{
+  "V3": {
+    "runs": 30,
+    "feasible_runs": 30,
+    "feasible_rate": 1.0,
+    "best_validated_area": 2.198699101484354,
+    "mean_validated_area": 2.1866219177044908,
+    "std_validated_area": 0.010104185843855222,
+    "median_validated_area": 2.1911650062564094,
+    "mean_area_failures_as_zero": 2.1866219177044908,
+    "mean_search_seconds": 6.60014360746668,
+    "mean_total_seconds": 8.157561787299999,
+    "mean_evaluations": 1188.2666666666667,
+    "finalization_timeouts": 0,
+    "max_overrun_seconds": 0.0
+  },
+  "V3_NN": {
+    "runs": 30,
+    "feasible_runs": 30,
+    "feasible_rate": 1.0,
+    "best_validated_area": 2.19646222452262,
+    "mean_validated_area": 2.1793312747877898,
+    "std_validated_area": 0.023584797253510772,
+    "median_validated_area": 2.1892109606700956,
+    "mean_area_failures_as_zero": 2.1793312747877898,
+    "mean_search_seconds": 6.602142927100029,
+    "mean_total_seconds": 8.171270036633336,
+    "mean_evaluations": 886.2666666666667,
+    "finalization_timeouts": 0,
+    "max_overrun_seconds": 0.0
+  },
+  "paired_V3_NN_minus_V3": {
+    "valid_pairs": 30,
+    "mean_delta": -0.007290642916701732,
+    "wins": 14,
+    "ties": 0,
+    "bootstrap_95_percent_interval": [
+      -0.01753845396084676,
+      0.0019230657061617838
+    ],
+    "note": "Conditional on both runs passing; small-budget results do not establish convergence."
+  }
+}

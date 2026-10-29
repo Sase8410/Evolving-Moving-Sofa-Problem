@@ -1,4 +1,6 @@
+pass
 import numpy as np
+from .motion import continuous_parts
 from .geometry import HALLWAY, ENTRANCE, EXIT, world, radius_bound, straight_arm
 
 
@@ -8,6 +10,9 @@ def verify(sofa, parts, max_depth=18, dense_samples=257, checkpoint=lambda: None
               "poses_checked": 0, "max_outside_area": 0.,
               "arithmetic": "floating point; not a formal certificate"}
     if sofa.is_empty or not sofa.is_valid or sofa.geom_type != "Polygon":
+        return report
+    if not continuous_parts(parts):
+        report["status"] = "discontinuous_motion"
         return report
     report["endpoints_in_separate_arms"] = bool(
         ENTRANCE.covers(world(sofa, parts[0](0))) and EXIT.covers(world(sofa, parts[-1](1))))
@@ -23,6 +28,7 @@ def verify(sofa, parts, max_depth=18, dense_samples=257, checkpoint=lambda: None
                 report["intervals_passed"] += 1
                 report["poses_checked"] += 2
                 continue
+        
         for t in np.linspace(0, 1, dense_samples):
             checkpoint()
             moved = world(sofa, motion(t))
@@ -49,6 +55,8 @@ def verify(sofa, parts, max_depth=18, dense_samples=257, checkpoint=lambda: None
                 report["intervals_passed"] += 1
             elif depth >= max_depth:
                 report["unresolved_intervals"] += 1
+                
+                
                 report["status"] = "inconclusive"
                 return report
             else:

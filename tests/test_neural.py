@@ -1,3 +1,4 @@
+pass
 import json
 from pathlib import Path
 import tempfile
@@ -10,6 +11,7 @@ from sofa_v3.neural import NeuralGuide, features
 
 
 def teach(guide, n=160):
+    pass
     rng = np.random.default_rng(88)
     param = Parameterization(seed_motion())
     for i in range(n):
@@ -32,6 +34,13 @@ class NeuralTests(unittest.TestCase):
                 self.assertTrue(g.maybe_fit())
                 self.assertTrue(g.report["ready"])
                 self.assertLess(g.report["holdout_rmse"],g.report["constant_baseline_rmse"])
+                self.assertGreaterEqual(g.report["top_half_ranking_accuracy"],.60)
+                param = Parameterization(seed_motion())
+                base = param.encode(param.base)
+                population = np.tile(base,(20,1))
+                for i in range(20):
+                    g.choose(base,population,np.ones(20),param,np.random.default_rng(i))
+                self.assertGreater(g.guided,0)
                 x = np.array([r["features"] for r in g.rows[:10]])
                 before = g.predict(x)
                 size = len(g.rows)
@@ -97,7 +106,8 @@ class NeuralTests(unittest.TestCase):
             rows = [json.loads(s) for s in (Path(tmp)/"evaluations.jsonl").read_text().splitlines()]
             self.assertEqual(len(rows),cfg.budget)
             self.assertEqual(result["search_evaluations"],cfg.budget)
-            self.assertGreater(result["neural"]["guided_evaluations"],0)
+            
+            self.assertGreater(result["neural"]["fits_this_run"],0)
             self.assertEqual(result["neural"]["guided_evaluations"],sum(
                 h.get("candidate_source","").startswith("nn_") for h in result["history"]))
             np.testing.assert_allclose([r["sampled_area"] for r in rows],
@@ -110,6 +120,7 @@ class NeuralTests(unittest.TestCase):
             self.assertIsNotNone(result["validated_area"])
             self.assertEqual(result["selected_finalist"]["verification"]["status"],"bounded_numerical_pass")
             self.assertFalse((Path(tmp)/"active.lock").exists())
+            
             warm = optimize(Config(seed=3,budget=20,surrogate=True,target=.01,
                                    finalists=1,nn_directory=tmp))
             self.assertGreater(warm["neural"]["loaded_rows"],0)
